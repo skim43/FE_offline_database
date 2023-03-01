@@ -8,58 +8,87 @@
 #include <sys/time.h>
 #include <sys/resource.h>
 
-#include "include/utils.cpp"
+#include "include/utils.h"
+#include "include/enumerations.h"
 
-int finalize(const Multiphysics& mp,
-      			 double total_time,
-      			 double out_time,
-      			 double restart_time,
-      			 double startup_time,
-      			 double ms_solve_time,
-      			 double ms_comm_time,
-      			 int myrank)
+
+int finalize (double total_time)
 {
   int err = 0;
   struct rusage usage;
   getrusage(RUSAGE_SELF, &usage);
   PGFEM_printf("\n");
-  PGFEM_printf("Time of analysis on processor [%d] - "
+  PGFEM_printf("Time of analysis - "
                " System %ld.%ld, User %ld.%ld.\n\n",
-               myrank, usage.ru_stime.tv_sec, usage.ru_stime.tv_usec,
+               usage.ru_stime.tv_sec, usage.ru_stime.tv_usec,
                usage.ru_utime.tv_sec, usage.ru_utime.tv_usec);
 
-  PGFEM_printf("Total time (no Network Init)  = %f\n\n", total_time);
-  PGFEM_printf("Startup time                  = %f\n", startup_time);
-  PGFEM_printf("Multiscale iteration time     = %f\n", ms_solve_time);
-  PGFEM_printf("Multiscale communication time = %f\n", ms_comm_time);
-  PGFEM_printf("Output write time             = %f\n", out_time);
-  PGFEM_printf("Restart write time            = %f\n\n", restart_time);
+  PGFEM_printf("Total time = %f\n\n", total_time);
+  // PGFEM_printf("Startup time                  = %f\n", startup_time);
+  // PGFEM_printf("Output write time             = %f\n", out_time);
+  // PGFEM_printf("Restart write time            = %f\n\n", restart_time);
 
   return err;
 }
 
 
-int main()
-{
+int main(int argc, char* argv[])
+{    
 	int err = 0;
+  int process_type;
+  double total_time = 0.0;
 
-  err += read_inputs();
+  // read input commands
+  parse_read_options(&process_type,argc,argv);
 
-  
-  err += initialze_samples();
+  try {  
+    // run pre-/post-processing routine
+    switch (process_type) {
 
-  
-  err += determine_accept_reject_samples();
+    case PRE_PROCESSING:
+
+      err += pre_1();
+
+      err += pre_2();
+
+      err += pre_3();
+
+      break;
+
+    case POST_PROCESSING:
+
+      err += post_read_inputs();
 
 
-  err += generate_2d_layer();
+      err += post_initialze_samples();
 
 
-  err += write_offline_library();
+      err += post_determine_accept_reject_samples();
 
 
-  err += finalize();  
+      err += post_generate_2d_layer();
 
-	return err;
+
+      err += post_write_offline_library();
+
+      break;
+
+    default:
+      PGFEM_printerr("ERROR, unrecognised type in %s\n",__func__);
+      PGFEM_Abort();
+      abort();
+    }
+
+  total_time += CLOCK(); // measure time spent  
+
+  err += finalize(total_time);
+    
+} catch (const std::exception& ex) {
+
+  cout << "Something went wrong: " << ex.what() << endl;
+  abort();
+} catch (...) {} 
+
+	return err;  
 } 
 

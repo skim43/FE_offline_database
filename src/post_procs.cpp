@@ -4,35 +4,7 @@
 #include "include/utils.h"
 #include "include/enumerations.h"
 
-void parse_read_options(int *process_type,
-						int argc, 
-						char **argv)
-{
-
-}
-
-void norm()
-{
-
-}
-
-void compute_score(double *score,
-				   double alphaj,
-				   long n_vector,				   
-				   double yj,
-				   double xj,
-				   double x,
-				   double b)
-{	   
-    score = b;
-
-    for (int i=0; i<n_vector; i++){
-    	score += alphaj[i]*yj[i]*exp(-norm(xj(i,:)-x,"fro")^2);
-    }
-
-}
-
-int read_inputs()
+int post_read_inputs()
 {
 	int err = 0;
 	in_in_dir_name  = 'sample_inputs';
@@ -75,7 +47,7 @@ int read_inputs()
 	return err;
 }
 
-int initialize_samples()
+int post_initialize_samples()
 {
 	int err = 0;
 
@@ -135,7 +107,7 @@ int initialize_samples()
 
 }
 
-int determine_accept_reject_samples()
+int post_determine_accept_reject_samples()
 {
 	int err = 0;
 
@@ -161,7 +133,7 @@ int determine_accept_reject_samples()
 }
 
 
-int generate_2d_layer()
+int post_generate_2d_layer()
 {
 	int err = 0;
 
@@ -264,7 +236,7 @@ int generate_2d_layer()
 }
 
 
-int write_offline_library()
+int post_write_offline_library()
 {
 	int err = 0;
 
