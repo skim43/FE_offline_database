@@ -1,2 +1,2 @@
-# FE_offline_database
+# Offline_database
 Generate offline database for multiscale simulation
